@@ -8,10 +8,10 @@ import java.awt.event.MouseListener;
 public class CrystalMain {
 
     JLabel counterLabel, perSecLabel;
-    UpgradePanel upgradePanel1, upgradePanel2, upgradePanel3, upgradePanel4;
+    UpgradePanel upgradePanel1, upgradePanel2, upgradePanel3, upgradePanel4, upgradePanel5;
     int SCALE, crystalCounter, timerSpeed;
     double perSecond;
-    boolean timerOn, mineUnlocked, explosivesUnlocked, quarryUnlocked;
+    boolean timerOn, mineUnlocked, explosivesUnlocked, quarryUnlocked, laserUnlocked;
     Font font1, font2;
     CrystalHandler cHandler = new CrystalHandler();
     Timer timer;
@@ -77,9 +77,9 @@ public class CrystalMain {
         counterPanel.add(perSecLabel);
 
         JPanel itemPanel = new JPanel();
-        itemPanel.setBounds(500*SCALE, 170*SCALE, 250*SCALE, 250*SCALE);
+        itemPanel.setBounds(500*SCALE, 170*SCALE, 250*SCALE, 320*SCALE);
         itemPanel.setBackground(Color.BLACK);
-        itemPanel.setLayout(new GridLayout(4,1));
+        itemPanel.setLayout(new GridLayout(5,1));
         window.add(itemPanel);
 
         upgradePanel1 = new UpgradePanel("Pickaxe", 0, 10, font1, 0.1, cHandler, mHandler);
@@ -94,6 +94,9 @@ public class CrystalMain {
 
         upgradePanel4 = new UpgradePanel("Quarry", 0, 10000, font1, 100, cHandler, mHandler);
         itemPanel.add(upgradePanel4.getButton());
+
+        upgradePanel5 = new UpgradePanel("Laser", 0, 100000, font1, 1000, cHandler, mHandler);
+        itemPanel.add(upgradePanel5.getButton());
 
         JPanel messagePanel = new JPanel();
         messagePanel.setBounds(500*SCALE, 70*SCALE, 250*SCALE, 150*SCALE);
@@ -138,6 +141,13 @@ public class CrystalMain {
                     if (crystalCounter >= upgradePanel4.getInitialPrice()) {
                         quarryUnlocked = true;
                         upgradePanel4.updateText();
+                    }
+                }
+
+                if (!laserUnlocked) {
+                    if (crystalCounter >= upgradePanel5.getInitialPrice()) {
+                        laserUnlocked = true;
+                        upgradePanel5.updateText();
                     }
                 }
             }
@@ -226,6 +236,20 @@ public class CrystalMain {
                     } else {
                         messageText.setText("You don't have enough Crystals!");
                     }
+                case "Laser":
+                    if (crystalCounter >= upgradePanel5.getPrice()) {
+                        crystalCounter -= upgradePanel5.getPrice();
+                        upgradePanel5.increasePrice();
+                        counterLabel.setText(String.format("%d Crystals", crystalCounter));
+
+                        upgradePanel5.increaseQuantity();
+                        upgradePanel5.updateText();
+                        messageText.setText(upgradePanel5.getMessageText());
+                        perSecond += upgradePanel5.getMineRate();
+                        timerUpdate();
+                    } else {
+                        messageText.setText("You don't have enough Crystals!");
+                    }
             }
 
 
@@ -276,7 +300,16 @@ public class CrystalMain {
                 } else {
                     messageText.setText(upgradePanel4.getMessageText());
                 }
+            } else if (button == upgradePanel5.getButton()){
+                if (!quarryUnlocked) {
+                    messageText.setText("This item is currently locked!");
+                } else if (!laserUnlocked){
+                    messageText.setText(String.format("Mine %d crystals to unlock!", upgradePanel5.getInitialPrice()));
+                } else {
+                    messageText.setText(upgradePanel5.getMessageText());
+                }
             }
+
         }
 
         @Override
@@ -290,6 +323,8 @@ public class CrystalMain {
             } else if (button == upgradePanel3.getButton()){
                 messageText.setText(null);
             } else if (button == upgradePanel4.getButton()){
+                messageText.setText(null);
+            } else if (button == upgradePanel5.getButton()){
                 messageText.setText(null);
             }
         }
